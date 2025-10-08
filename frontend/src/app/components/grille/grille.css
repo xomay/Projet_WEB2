@@ -1,0 +1,22 @@
+div {
+  --size-cell: 58px;
+  --nb-cell: 10;
+  --z-rotate: 45deg;
+  --x-rotate: 60deg;
+}
+.map {
+  line-height: 0;
+  position: absolute;
+  top: 70px;
+  left: 40pc;
+  transform: translateY(90px) scale(2) rotateX(var(--x-rotate)) rotateZ(var(--z-rotate));
+  margin: auto;
+  width: calc(var(--size-cell) * var(--nb-cell));
+  z-index: 1000;
+}
+.tile {
+  user-select: none;
+  margin: 0 -21px;
+  transform: rotateZ(-45deg) rotateY(-60deg) scale(1.6);
+  clip-path: polygon(50px 0, 0 25px, 0 32px, 50px 58px, 100px 33px, 100px 25px, 50px 0);
+}

@@ -1,8 +1,5 @@
-<div style="display: flex; align-items: center; flex-direction: column">
-  <div class="map">
-    @for (_ of [].constructor(100); track $index; let i = $index) {
-      <img class='tile' src='/plain.svg' draggable="false"
-           [attr.data-i]=i /> <!--[ioClick] [style.cursor] [ngSrc] [ioMouseenter] [ioMouse]-->
-    }
-  </div>
+<div class="map">
+  @for (_ of [].constructor(100); track $index; let i = $index) {
+    <img class='tile' src="{{getTile()}}" draggable="false" [attr.data-i]=i  alt="tile"/>
+  }
 </div>

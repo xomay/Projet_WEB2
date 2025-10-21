@@ -1,0 +1,116 @@
+openapi: 3.0.3
+info:
+  title: API du Projet Web2 - Jeu (Angular & Java)
+  description: >
+    Cette API gère le backend du jeu développé dans le cadre du projet Web2 pour 4INFO.
+  version: 1.0.0
+  contact:
+    name: Ieshuah et Mathys
+
+servers:
+  - url: http://localhost:8000
+    description: Serveur local de développement
+
+paths:
+  /api/v1/maps/:
+    get:
+      summary: Récupère la liste de toutes les cartes
+      tags:
+        - Maps
+      responses:
+        "200":
+          description: Liste des cartes récupérée avec succès
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Map"
+        "500":
+          description: Erreur interne du serveur
+
+  /api/v1/map/:
+    post:
+      summary: Crée une nouvelle carte
+      tags:
+        - Maps
+      requestBody:
+        description: Données de la carte à créer
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+      responses:
+        "201":
+          description: Carte créée avec succès
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Map"
+        "400":
+          description: Données invalides
+        "500":
+          description: Erreur interne du serveur
+
+  /api/v1/map/{id}:
+    get:
+      summary: Récupère une carte selon son identifiant
+      tags:
+        - Maps
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant unique de la carte
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Carte trouvée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Map"
+        "404":
+          description: Carte non trouvée
+        "500":
+          description: Erreur interne du serveur
+
+    delete:
+      summary: Supprime une carte selon son identifiant
+      tags:
+        - Maps
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant unique de la carte à supprimer
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Carte supprimée avec succès
+        "404":
+          description: Carte non trouvée
+        "500":
+          description: Erreur interne du serveur
+
+components:
+  schemas:
+    Map:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Map 1"
+        tiles:
+          type: string
+          example: "plain,plain,forest,..."
+      required:
+        - name
+        - tiles
+

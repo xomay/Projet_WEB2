@@ -24,9 +24,21 @@ export class BackendService {
   getMaps(): Map[] {
     /* Call to backend API  to retrieve maps */
     // this.maps = this.http.get<Map[]>('/api/maps');
+    const tiles: Tile[] = [];
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        tiles.push({ x, y, type: 'plain', piece: '' });
+      }
+    }
+    const tiles2: Tile[] = [];
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        tiles2.push({ x, y, type: 'free', piece: '' });
+      }
+    }
     this.maps = [
-      { id: 1, name: 'Map 1', tiles: [] },
-      { id: 2, name: 'Map 2', tiles: [] }
+      { id: 1, name: 'Map 1', tiles: tiles },
+      { id: 2, name: 'Map 2', tiles: tiles2 }
     ];
     return this.maps;
   }

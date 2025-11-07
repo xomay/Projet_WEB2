@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { MapModel } from '../models/map-model';
+import { PlainTileModel, TreeTileModel, WaterTileModel } from '../models/tile-model';
 
 // Map DTO
 export interface Map {
@@ -18,7 +20,27 @@ export interface Tile {
 })
 export class BackendService {
   private maps: Map[] = [];
-  public currentMap: Map | null = null;
+  public currentMap: MapModel | null = null;
+  protected readonly Math = Math;
+
+  constructor() { 
+    this.currentMap = this.getRandomMap();
+  }
+
+  getRandomMap(): MapModel {
+    var list = []
+    for (var i = 0; i<10; i++){
+      var sublist = []
+      for (var j = 0; j<10; j++){
+        const randomNum = Math.floor(Math.random() * 5);
+        if (randomNum == 0 ) sublist.push(new WaterTileModel(j,i));
+        else if (randomNum == 1 ) sublist.push(new TreeTileModel(j,i));
+        else sublist.push(new PlainTileModel(j,i));
+      }
+      list.push(sublist);
+    }
+    return new MapModel('Random Map', list);
+  }
 
   getMaps(): Map[] {
     /* Call to backend API  to retrieve maps */
@@ -40,7 +62,7 @@ export class BackendService {
       {name: 'Map with plains', tiles: tiles },
       {name: 'Map with trees', tiles: tiles2 }
     ];
-    return this.maps;
+    return this.maps; //needs to be replace by a MapModel return using a MapFactory
   }
 
   getMapById(id: number): Map | undefined {
@@ -53,8 +75,7 @@ export class BackendService {
       }
     }
     const map: Map = { name: `MapById ${id}`, tiles: tiles3 };
-    this.currentMap = map;
-    return this.currentMap;
+    return map;
   }
 
   saveMap(map: Map): Map {
@@ -66,7 +87,6 @@ export class BackendService {
     }); */
 
     //hardcoded example logic
-    this.currentMap = map;
     this.maps.push(map);
     return map;
   }
@@ -78,7 +98,7 @@ export class BackendService {
       this.getMaps(); // Refresh the maps list
     }); */
     //hardcoded example logic
-    this.maps.pop();
+    this.maps.splice(id, 1);
     this.getMaps();
     return true;
   }

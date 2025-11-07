@@ -1,0 +1,7 @@
+<div class="map">
+  @for (row of map()?.tiles; track $index; let i = $index) {
+    @for (tile of row; track $index; let j = $index) {
+      <app-tile-component [tile]="tile"></app-tile-component>
+    }
+  }
+</div>

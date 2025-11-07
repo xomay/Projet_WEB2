@@ -1,0 +1,6 @@
+.tile {
+  user-select: none;
+  margin: 0 -21px;
+  transform: rotateZ(-45deg) rotateY(-60deg) scale(1.6);
+  clip-path: polygon(50px 0, 0 25px, 0 32px, 50px 58px, 100px 33px, 100px 25px, 50px 0);
+}

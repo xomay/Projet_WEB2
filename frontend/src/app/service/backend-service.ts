@@ -1,11 +1,57 @@
-import { Injectable } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import { MapModel } from '../models/map-model';
-import { PlainTileModel, TreeTileModel, WaterTileModel } from '../models/tile-model';
+import {PlainTileModel, TileModel, TreeTileModel, WaterTileModel} from '../models/tile-model';
+import {HttpClient} from '@angular/common/http';
+import {map, Observable} from 'rxjs';
+import {Router} from '@angular/router';
+
+class MapFactory {
+  public createMapFromDTO(dto: MapDTO): MapModel {
+    const tilesArray: string[] = dto.tiles.split(',');
+    const size = Math.sqrt(tilesArray.length);
+    const tiles: TileModel[][] = [];
+    for (let y = 0; y < size; y++) {
+      const row: TileModel[] = [];
+      for (let x = 0; x < size; x++) {
+        const type = tilesArray[y * size + x];
+        let tile;
+        switch (type) {
+          case 'water':
+            tile = new WaterTileModel(Number(x), Number(y));
+            break;
+          case 'tree':
+            tile = new TreeTileModel(Number(x), Number(y));
+            break;
+          case 'plain':
+          default:
+            tile = new PlainTileModel(Number(x), Number(y));
+            break;
+        }
+        row.push(tile);
+      }
+      tiles.push(row);
+    }
+    return new MapModel(dto.name, tiles);
+  }
+
+  public createDTOFromMap(map: MapModel): MapCreateDTO {
+    return {
+      name: map.name,
+      tiles: map.tiles.flat().map(tile => tile.getSrc()).toString()
+    }
+  }
+}
 
 // Map DTO
-export interface Map {
+export interface MapDTO {
+  id: number;
   name: string;
-  tiles: Tile[];
+  tiles: string;
+}
+
+export interface MapCreateDTO {
+  name: string;
+  tiles: string;
 }
 
 export interface Tile {
@@ -19,11 +65,14 @@ export interface Tile {
   providedIn: 'root'
 })
 export class BackendService {
-  private maps: Map[] = [];
+  private maps: MapDTO[] = [];
   public currentMap: MapModel | null = null;
   protected readonly Math = Math;
+  private mapFactory =  new MapFactory();
+  private client = inject(HttpClient)
+  private readonly router = inject(Router);
 
-  constructor() { 
+  constructor() {
     this.currentMap = this.getRandomMap();
   }
 
@@ -39,48 +88,45 @@ export class BackendService {
       }
       list.push(sublist);
     }
-    return new MapModel('Random Map', list);
+    return new MapModel([...Array(10)].map(() => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join(''), list);
   }
 
-  getMaps(): Map[] {
+  getMaps(): Observable<MapDTO[]> {
     /* Call to backend API  to retrieve maps */
-    // this.maps = this.http.get<Map[]>('/api/v1/maps/');
-    // The backend should return an array of maps in DTO format
-    const tiles: Tile[] = [];
-    for (let y = 0; y < 8; y++) {
-      for (let x = 0; x < 8; x++) {
-        tiles.push({ x, y, type: 'plain', piece: '' });
-      }
-    }
-    const tiles2: Tile[] = [];
-    for (let y = 0; y < 8; y++) {
-      for (let x = 0; x < 8; x++) {
-        tiles2.push({ x, y, type: 'tree', piece: '' });
-      }
-    }
-    this.maps = [
-      {name: 'Map with plains', tiles: tiles },
-      {name: 'Map with trees', tiles: tiles2 }
-    ];
-    return this.maps; //needs to be replace by a MapModel return using a MapFactory
+    return this.client.get<MapDTO[]>('/api/v1/maps/');
   }
 
-  getMapById(id: number): Map | undefined {
-    // We call the backend to get the map with the given id
-    // Example: map = this.http.get<Map>(`api/v1/map/{id}`);
-    const tiles3: Tile[] = [];
-    for (let y = 0; y < 8; y++) {
-      for (let x = 0; x < 8; x++) {
-        tiles3.push({ x, y, type: 'water', piece: '' });
-      }
-    }
-    const map: Map = { name: `MapById ${id}`, tiles: tiles3 };
-    return map;
+  getMapById(id: number): Observable<MapModel> {
+    return this.client.get<MapDTO>(`api/v1/map/${id}`).pipe(
+      map(dto => this.mapFactory.createMapFromDTO(dto))
+    );
   }
 
-  saveMap(map: Map): Map {
+  selectMap(id: number): void {
+    const map = this.getMapById(id);
+    map.subscribe((map: MapModel) => {
+      this.currentMap = map;
+      this.router.navigate(['/map']);
+    })
+  }
+
+  selectRandomMap(): void {
+    const createMap = this.mapFactory.createDTOFromMap(this.getRandomMap());
+    this.client.post<MapDTO>('/api/v1/maps', createMap).subscribe({
+      next: (dto: MapDTO) => {
+        const activeMap = this.mapFactory.createMapFromDTO(dto);
+        this.currentMap = activeMap;
+        this.router.navigate(['/map']);
+      },
+      error: (err) => {
+        console.error('Erreur lors de la création de la map :', err);
+      }
+    });
+  }
+
+  saveMap(map: MapDTO): MapDTO {
     /* Logic that calls the backend to create a new map and assigns it an ID
-    // Example: 
+    // Example:
     this.http.post('api/v1/map/', currentMap).subscribe(response => {
     this.maps.push(response);
     this.currentMap = response;
@@ -91,15 +137,8 @@ export class BackendService {
     return map;
   }
 
-  deleteMap(id: number): boolean {
-    /* Logic that calls the backend to delete the map with the given id
-    // Example:
-    this.http.delete(`api/v1/map/${id}`).subscribe(() => {
-      this.getMaps(); // Refresh the maps list
-    }); */
-    //hardcoded example logic
-    this.maps.splice(id, 1);
-    this.getMaps();
-    return true;
+  deleteMap(id: number) {
+    //Logic that calls the backend to delete the map with the given id
+    return this.client.delete(`api/v1/map/${id}`);
   }
 }

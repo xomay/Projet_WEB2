@@ -15,6 +15,7 @@ public class Map {
     @GeneratedValue
     protected long id;
     protected String name;
+    @Lob
     protected String tiles;
 
     public String getName() {

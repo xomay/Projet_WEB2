@@ -1,1 +1,21 @@
-<p>menu works!</p>
+<h1>Web2 frontend</h1>
+<div style="display: flex; justify-content: center; align-items: center; flex-direction: column; height: 80vh">
+  <div class="select-menu">
+    <p>Select a map to play with : </p>
+    <div class="choices">
+      <div class="choice">
+        <label for="random" style="width: 90%">Generate a random map</label>
+        <input (click)="selectRandomMap()" type="radio" id="random" name="random"/>
+      </div>
+      @for (map of maps(); track map.id) {
+        <div class="choice">
+          <button (click)="deleteMap(map.id)">Delete</button>
+          <label (click)="selectMap(map.id)" for="{{map.name}}" style="width: 90%">{{map.name}}</label>
+          <input (click)="selectMap(map.id)" type="radio" id="{{map.id}}" name="{{map.name}}"/>
+        </div>
+      }
+    </div>
+    <p style="color: #7a7a7a">Click on a map item to launch the game with</p>
+    <input type="text" placeholder="Player name" style="margin-top: 10px"/>
+  </div>
+</div>

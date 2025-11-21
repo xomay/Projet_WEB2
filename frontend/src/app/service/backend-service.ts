@@ -78,6 +78,7 @@ export class BackendService {
       this.getMaps(); // Refresh the maps list
     }); */
     //hardcoded example logic
+    console.log(`Deleting map with id ${id}`);
     this.maps.pop();
     this.getMaps();
     return true;

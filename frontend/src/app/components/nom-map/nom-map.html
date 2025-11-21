@@ -1,0 +1,13 @@
+<div class="container">
+  <h2 class="map-title">{{ mapName }}</h2>
+
+  <div class="input-group">
+    <label for="player">Player name:</label>
+     <input
+      id="player"
+      type="text"
+      (input)="onPlayerNameChange()"
+      placeholder="Enter your name..."
+    />
+  </div>
+</div>

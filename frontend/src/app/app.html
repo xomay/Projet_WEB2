@@ -1,8 +1,27 @@
-<main>
-  <div style="display: flex; flex-direction: column; align-items: center;">
-    <h1>{{title()}}</h1>
+<main class="layout">
+
+  <!-- Header completo -->
+  <div class="header">
+    <div class="left-header">
+      <h1>{{ title() }}</h1>
+
+      <app-score-circle
+        [score]="18"
+        [max]="30"
+        [turn]="2">
+      </app-score-circle>
+    </div>
+
+    <div class="right-header">
+      <app-nom-map></app-nom-map>
+    </div>
+  </div>
+
+  <!-- Mapa -->
+  <div class="map-container">
     <app-grille></app-grille>
   </div>
+
 </main>
 
 <router-outlet />

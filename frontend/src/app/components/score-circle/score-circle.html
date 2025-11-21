@@ -1,0 +1,24 @@
+<div class="wrapper">
+  <svg class="progress" viewBox="0 0 36 36">
+    <!-- Background circle -->
+    <path
+      class="bg"
+      d="M18 2
+         a 16 16 0 0 1 0 32
+         a 16 16 0 0 1 0 -32" />
+
+    <!-- Progress circle -->
+    <path
+      class="progress-bar"
+      [attr.stroke-dasharray]="percentage + ', 100'"
+      d="M18 2
+         a 16 16 0 0 1 0 32
+         a 16 16 0 0 1 0 -32" />
+  </svg>
+
+  <div class="content">
+    <div class="label">Score:</div>
+    <div class="value">{{ score }} / {{ max }}</div>
+    <div class="turn">Turn #{{ turn }}</div>
+  </div>
+</div>

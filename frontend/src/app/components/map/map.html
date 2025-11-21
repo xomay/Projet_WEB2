@@ -1,3 +1,8 @@
+<div style="display: flex; align-items: center; width: 100%;">
+  <app-score-circle class="left-header"></app-score-circle>
+  <h1>{{title()}}</h1>
+  <app-nom-map class="right-header"></app-nom-map>
+</div>
 <div class="map">
   @for (row of map()?.tiles; track $index; let i = $index) {
     @for (tile of row; track $index; let j = $index) {

@@ -14,3 +14,55 @@ div {
   width: calc(var(--size-cell) * var(--nb-cell));
   z-index: 1000;
 }
+
+@font-face {
+  font-family: Bodo;
+  src: url("/BodoAmat.ttf");
+}
+
+* {
+  font-family: Bodo;
+}
+
+h1 {
+  position: absolute;
+  top: 2%;
+  left: 4%;
+}
+.layout {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+/* HEADER SUPERIOR */
+.header {
+  display: grid;
+  grid-template-columns: 300px 1fr; /* izquierda fijo, derecha el espacio restante */
+  align-items: start;
+}
+
+/* HEADER IZQUIERDO */
+.left-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+/* HEADER DERECHO */
+.right-header {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  /*padding-right: 1rem;*/
+}
+
+/* MAPA */
+.map-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

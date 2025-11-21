@@ -8,7 +8,7 @@ info:
     name: Ieshuah et Mathys
 
 servers:
-  - url: http://localhost:8000
+  - url: http://localhost:4444
     description: Serveur local de développement
 
 paths:
@@ -28,8 +28,6 @@ paths:
                   $ref: "#/components/schemas/Map"
         "500":
           description: Erreur interne du serveur
-
-  /api/v1/map/:
     post:
       summary: Crée une nouvelle carte
       tags:
@@ -40,14 +38,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Map"
+              $ref: "#/components/schemas/MapDTO"
       responses:
         "201":
           description: Carte créée avec succès
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Map"
+                $ref: "#/components/schemas/MapDTO"
         "400":
           description: Données invalides
         "500":
@@ -110,6 +108,18 @@ components:
         tiles:
           type: string
           example: "plain,plain,forest,..."
+      required:
+        - name
+        - tiles
+    MapDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Map 1"
+        tiles:
+          type: string
+          example: "plain,plain,forest"
       required:
         - name
         - tiles

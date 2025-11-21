@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Grille } from './grille';
+import { Map } from './map';
 
-describe('Grille', () => {
-  let component: Grille;
-  let fixture: ComponentFixture<Grille>;
+describe('Map', () => {
+  let component: Map;
+  let fixture: ComponentFixture<Map>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Grille]
+      imports: [Map]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Grille);
+    fixture = TestBed.createComponent(Map);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

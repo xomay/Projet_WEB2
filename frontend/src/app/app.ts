@@ -1,15 +1,23 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import {Grille} from './components/grille/grille';
-import {ScoreCircle} from './components/score-circle/score-circle';
-  import { NomMap } from './components/nom-map/nom-map';
+import {Map} from './components/map/map';
+import { MapModel } from './models/map-model';
+import { BackendService } from './service/backend-service';
 
-  @Component({
-    selector: 'app-root',
-    imports: [RouterOutlet, Grille, ScoreCircle, NomMap],
+@Component({
+  selector: 'app-root',
+  imports: [RouterOutlet, Map],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
   protected readonly title = signal('Web2 frontend');
+  currentMap = signal(new MapModel('My Map', [[]]));
+  private backendService = inject(BackendService);
+
+  constructor() {
+    this.backendService.currentMap 
+      ? this.currentMap.set(this.backendService.currentMap!) 
+      : this.currentMap.set(new MapModel('My Map', [[]]));
+  }
 }

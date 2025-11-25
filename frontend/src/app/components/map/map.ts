@@ -4,10 +4,11 @@ import { TileComponent } from '../tile-component/tile-component';
 import {NomMap} from '../nom-map/nom-map';
 import {ScoreCircle} from '../score-circle/score-circle';
 import {BackendService} from '../../service/backend-service';
+import { UndoRedo } from '../undo-redo/undo-redo';
 
 @Component({
   selector: 'app-map',
-  imports: [TileComponent, NomMap, ScoreCircle],
+  imports: [TileComponent, NomMap, ScoreCircle, UndoRedo],
   templateUrl: './map.html',
   styleUrl: './map.css'
 })

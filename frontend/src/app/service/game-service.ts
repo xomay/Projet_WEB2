@@ -1,5 +1,8 @@
-import {Injectable, signal, WritableSignal} from '@angular/core';
-import {TileModel} from '../models/tile-model';
+import {inject, Injectable, signal, WritableSignal} from '@angular/core';
+import {PlainTileModel, TileModel, TreeTileModel, WaterTileModel} from '../models/tile-model';
+import {AnimalModel, BearModel, FishModel, FoxModel} from '../models/animal-model';
+import {BackendService} from './backend-service';
+import {MapModel} from '../models/map-model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,22 +14,141 @@ export class GameService {
 
   public playerName: string = 'Default Player';
 
-  public animalSelected : WritableSignal<TileModel | undefined> = signal(undefined);
+public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefined);
   public availableAnimals: WritableSignal<Map<string, number>> = signal(new Map<string, number>([
     ['bear', 1],
-    ['fish', 1],
-    ['fox', 1]
+    ['fish', 0],
+    ['fox', 0]
   ]));
+
+  private backendService = inject(BackendService);
 
   private pastStates: { score: number; turn: number }[] = [];
   private futureStates: { score: number; turn: number }[] = [];
   isGameOver: boolean = false;
   finalScore: number | null = null;
 
-  setAnimalSelected(animal: TileModel): void {
+  setAnimalSelected(animal: AnimalModel): void {
     if (this.availableAnimals().get(animal.getSrc()) === undefined) return;
     else if (this.availableAnimals().get(animal.getSrc())! <= 0) return;
     this.animalSelected.set(animal);
+  }
+
+  computePoints(tile: TileModel): void {
+    if (this.animalSelected() === undefined) return;
+    this.resetPoints();
+    const x = tile.x;
+    const y = tile.y;
+    switch (true) {
+      case tile instanceof WaterTileModel:
+        if (this.animalSelected()! instanceof FishModel) {
+          const map = this.backendService.currentMap();
+          map.tiles[y][x].points = this.animalSelected()!.basePoints;
+          map.tiles = this.computeRadius(x, y, map.tiles);
+          const newTiles = map.tiles.slice();
+          this.backendService.currentMap.set(new MapModel(map.name, newTiles));
+        }
+        break;
+
+      case tile instanceof PlainTileModel:
+      case tile instanceof TreeTileModel:
+        if (!(this.animalSelected()! instanceof FishModel)) {
+          const map = this.backendService.currentMap();
+          map.tiles[y][x].points = this.animalSelected()!.basePoints;
+          map.tiles = this.computeRadius(x, y, map.tiles);
+          const newTiles = map.tiles.slice();
+          this.backendService.currentMap.set(new MapModel(map.name, newTiles));
+        }
+        break;
+    }
+  }
+
+  resetPoints(): void {
+    const map = this.backendService.currentMap();
+    map.tiles.map((row) => row.map((tile: TileModel) => {tile.points = 0;}));
+    this.backendService.currentMap.set(new MapModel(map.name, map.tiles));
+  }
+
+  computeRadius(x: number, y: number, tiles: TileModel[][]): TileModel[][] {
+    const radius = this.animalSelected()!.radius;
+    for (let dy = -radius; dy <= radius; dy++) {
+      for (let dx = -radius; dx <= radius; dx++) {
+        if (dx == 0 && dy == 0) continue; // skip center tile
+        const tile = tiles[y + dy]?.[x + dx];
+        switch (true) {
+          case tile instanceof PlainTileModel:
+            if (this.animalSelected() instanceof FoxModel) {
+              tiles[y + dy][x + dx].points += 7;
+            }
+            break;
+          case tile instanceof TreeTileModel:
+            if (this.animalSelected() instanceof BearModel) {
+              tiles[y + dy][x + dx].points += 4;
+            }
+            break;
+          case tile instanceof WaterTileModel:
+            if (this.animalSelected() instanceof FishModel) {
+              tiles[y + dy][x + dx].points += 5;
+            }
+            break;
+          case tile instanceof FishModel:
+            if (this.animalSelected() instanceof BearModel) {
+              tiles[y + dy][x + dx].points += 7;
+            }
+            if (this.animalSelected() instanceof FishModel) {
+              tiles[y + dy][x + dx].points -= 2;
+            }
+            break;
+          case tile instanceof FoxModel:
+            if (!(this.animalSelected() instanceof FishModel)) {
+              tiles[y + dy][x + dx].points -= 2;
+            }
+            break;
+          case tile instanceof BearModel:
+            if (this.animalSelected() instanceof BearModel) {
+              tiles[y + dy][x + dx].points -= 5;
+            }
+            break;
+          default:
+            break;
+        }
+      }
+    }
+    return tiles;
+  }
+
+  placeAnimal(x:number, y:number): void {
+    if (this.animalSelected() === undefined) return;
+    const tile = this.backendService.currentMap().tiles[y][x];
+    switch (true){
+      case tile instanceof PlainTileModel :
+      case tile instanceof TreeTileModel :
+        if (!(this.animalSelected()! instanceof FishModel)){
+          this.backendService.currentMap().tiles[y][x] = this.animalSelected()!.clone();
+          //remplacer par la gestion du score
+          console.log("Points gagnés : ", this.backendService.currentMap().tiles.flat().reduce((acc, tile) => acc + tile.points, 0) + this.animalSelected()!.basePoints);
+          this.minusAnimal();
+        }
+        break;
+      case tile instanceof WaterTileModel :
+        if (this.animalSelected()! instanceof FishModel) {
+          this.backendService.currentMap().tiles[y][x] = this.animalSelected()!.clone();
+          //remplacer par la gestion du score
+          console.log("Points gagnés : ", this.backendService.currentMap().tiles.flat().reduce((acc, tile) => acc + tile.points, 0) + this.animalSelected()!.basePoints);
+          this.minusAnimal();
+        }
+        break;
+    }
+    if (this.availableAnimals().get(this.animalSelected()!.getSrc())! <= 0) {
+      this.animalSelected.set(undefined);
+    }
+    this.resetPoints();
+  }
+
+  minusAnimal(): void {
+    this.availableAnimals().set(
+      this.animalSelected()!.getSrc(),
+      this.availableAnimals().get(this.animalSelected()!.getSrc())! - 1);
   }
 
   nextTurn(scoreDelta: number = 0): void {

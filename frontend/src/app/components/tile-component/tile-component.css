@@ -21,3 +21,21 @@
     opacity: 1;
   }
 }
+
+.tile-container {
+  position: relative;
+  display: inline-block;
+  justify-content: center;
+  align-items: center;
+}
+
+.tile-label {
+  position: absolute;
+  top: 10px;
+  width: 100%;
+  text-align: center;
+  z-index: 2;
+  pointer-events: none;
+  /* Correction pour garder le texte droit malgré la rotation de la tuile */
+  transform: rotateZ(-45deg) scale(1.3);
+}

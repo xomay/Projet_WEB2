@@ -6,15 +6,15 @@
 
   <app-undo-redo class="footer-right"></app-undo-redo>
   <app-tile-menu class="left-footer"></app-tile-menu>
-  @if (animal() !== undefined) {
+  @if (animal !== undefined) {
     <img
       #cursorImg
-      src="{{animal()?.src}}"
+      src="{{animal?.src}}"
       class="cursor-image"
       alt="Selected Animal"/>
   }
   <div class="map">
-    @for (row of map().tiles; track $index; let y = $index) {
+    @for (row of currentMap.tiles; track $index; let y = $index) {
       @for (tile of row; track $index; let x = $index) {
         <app-tile-component (click)="changeTile(x,y)" [tile]="tile"></app-tile-component>
       }

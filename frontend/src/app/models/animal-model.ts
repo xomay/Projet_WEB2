@@ -12,7 +12,7 @@ export abstract class AnimalModel extends TileModel{
 
 export class BearModel extends AnimalModel {
   constructor(x: number, y: number) {
-    super('/bear.svg', x, y, 5, 2);
+    super('/bear.svg', x, y, 6, 2);
   }
 
   override getSrc(): string{
@@ -26,7 +26,7 @@ export class BearModel extends AnimalModel {
 
 export class FishModel extends AnimalModel {
   constructor(x: number, y: number) {
-    super('/fish.svg', x, y, 3, 1);
+    super('/fish.svg', x, y, 8, 1);
   }
 
   override getSrc(): string{
@@ -40,7 +40,7 @@ export class FishModel extends AnimalModel {
 
 export class FoxModel extends AnimalModel {
   constructor(x: number, y: number) {
-    super('/fox.svg', x, y, 4, 2);
+    super('/fox.svg', x, y, 5, 1);
   }
 
   override getSrc(): string{

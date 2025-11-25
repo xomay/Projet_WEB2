@@ -2,6 +2,7 @@ export abstract class TileModel {
     public readonly src: string;
     public readonly x : number;
     public readonly y: number;
+    public points: number = 0;
     constructor(src: string, x: number, y: number) {
         this.src = src;
         this.x = x;

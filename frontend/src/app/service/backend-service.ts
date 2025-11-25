@@ -66,14 +66,14 @@ export interface Tile {
 })
 export class BackendService {
   private maps: MapDTO[] = [];
-  public currentMap: WritableSignal<MapModel | undefined> = signal(undefined);
+  public currentMap: WritableSignal<MapModel>;
   protected readonly Math = Math;
   private mapFactory =  new MapFactory();
   private client = inject(HttpClient)
   private readonly router = inject(Router);
 
   constructor() {
-    this.currentMap.set(this.getRandomMap());
+    this.currentMap = signal<MapModel>(this.getRandomMap());
   }
 
   getRandomMap(): MapModel {

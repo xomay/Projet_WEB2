@@ -1,1 +1,6 @@
-<img class="tile" [src]="tile()?.src" alt="tile">
+<div (mouseenter)="computePoints()" (mouseleave)="computePoints()" class="tile-container">
+  <img class="tile" [src]="tile()?.src" alt="tile">
+  @if (tile()?.points !== undefined && tile()!.points != 0) {
+    <p class="tile-label">{{ tile()!.points }}</p>
+  }
+</div>

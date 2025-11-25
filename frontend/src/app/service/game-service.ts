@@ -12,7 +12,7 @@ export class GameService {
   public turn: number = 1;
   public scoreLimit: number = 20;
 
-  public playerName: string = 'Default Player';
+  public playerName: string = '';
 
 public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefined);
   public availableAnimals: WritableSignal<Map<string, number>> = signal(new Map<string, number>([

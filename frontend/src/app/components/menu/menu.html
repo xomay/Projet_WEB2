@@ -10,7 +10,7 @@
       @for (map of maps(); track map.id) {
         <div class="choice">
           <button (click)="deleteMap(map.id)">Delete</button>
-          <label (click)="selectMap(map.id)" for="{{map.name}}" style="width: 90%">{{map.name}}</label>
+          <label (click)="selectMap(map.id)" for="{{map.name}}" style="width: 90%">Play with '{{map.name}}'</label>
           <input (click)="selectMap(map.id)" type="radio" id="{{map.id}}" name="{{map.name}}"/>
         </div>
       }

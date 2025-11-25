@@ -9,6 +9,7 @@ export abstract class TileModel {
     }
 
     abstract getSrc(): string;
+    abstract clone(): TileModel;
 }
 
 export class WaterTileModel extends TileModel {
@@ -18,6 +19,10 @@ export class WaterTileModel extends TileModel {
 
     override getSrc(): string{
       return 'water';
+    }
+
+    override clone(): TileModel {
+      return new WaterTileModel(this.x, this.y);
     }
 }
 
@@ -29,6 +34,10 @@ export class TreeTileModel extends TileModel {
     override getSrc(): string{
       return 'tree';
     }
+
+    override clone(): TileModel {
+      return new TreeTileModel(this.x, this.y);
+    }
 }
 
 export class PlainTileModel extends TileModel {
@@ -38,5 +47,9 @@ export class PlainTileModel extends TileModel {
 
     override getSrc(): string{
       return 'plain';
+    }
+
+    override clone(): TileModel {
+      return new PlainTileModel(this.x, this.y);
     }
 }

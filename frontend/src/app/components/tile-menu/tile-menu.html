@@ -1,0 +1,14 @@
+<div class="tile-menu">
+  <div (click)="setActiveTile(bear)" class="tile-button">
+    <p class="tile-number">{{ gameService.availableAnimals().get('bear') }}</p>
+    <img src="/bear.svg" alt="Bear">
+  </div>
+  <div (click)="setActiveTile(fish)" class="tile-button">
+    <p class="tile-number">{{ gameService.availableAnimals().get('fish') }}</p>
+    <img src="/fish.svg" alt="Fish">
+  </div>
+  <div (click)="setActiveTile(fox)" class="tile-button">
+    <p class="tile-number">{{ gameService.availableAnimals().get('fox') }}</p>
+    <img src="/fox.svg" alt="Fox">
+  </div>
+</div>

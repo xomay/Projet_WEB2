@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import {Injectable, signal, WritableSignal} from '@angular/core';
+import {TileModel} from '../models/tile-model';
 
 @Injectable({
   providedIn: 'root'
@@ -10,10 +11,23 @@ export class GameService {
 
   public playerName: string = 'Default Player';
 
+  public animalSelected : WritableSignal<TileModel | undefined> = signal(undefined);
+  public availableAnimals: WritableSignal<Map<string, number>> = signal(new Map<string, number>([
+    ['bear', 1],
+    ['fish', 1],
+    ['fox', 1]
+  ]));
+
   private pastStates: { score: number; turn: number }[] = [];
   private futureStates: { score: number; turn: number }[] = [];
   isGameOver: boolean = false;
   finalScore: number | null = null;
+
+  setAnimalSelected(animal: TileModel): void {
+    if (this.availableAnimals().get(animal.getSrc()) === undefined) return;
+    else if (this.availableAnimals().get(animal.getSrc())! <= 0) return;
+    this.animalSelected.set(animal);
+  }
 
   nextTurn(scoreDelta: number = 0): void {
     if (this.isGameOver) return;

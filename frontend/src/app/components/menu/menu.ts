@@ -1,9 +1,13 @@
 import {Component, inject, signal} from '@angular/core';
 import {BackendService, MapDTO} from '../../service/backend-service';
+import {GameService} from '../../service/game-service';
+import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-menu',
-  imports: [],
+  imports: [
+    FormsModule
+  ],
   templateUrl: './menu.html',
   styleUrl: './menu.css'
 })
@@ -11,6 +15,7 @@ import {BackendService, MapDTO} from '../../service/backend-service';
 export class Menu {
   private backendService = inject(BackendService);
   maps = signal<MapDTO[]>([]);
+  public gameService = inject(GameService);
 
   constructor() {
     this.backendService.getMaps().subscribe(maps => {

@@ -8,6 +8,8 @@ export class GameService {
   public turn: number = 1;
   public scoreLimit: number = 20;
 
+  public playerName: string = 'Default Player';
+
   private pastStates: { score: number; turn: number }[] = [];
   private futureStates: { score: number; turn: number }[] = [];
   isGameOver: boolean = false;

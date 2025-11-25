@@ -16,8 +16,8 @@ export class App {
   private backendService = inject(BackendService);
 
   constructor() {
-    this.backendService.currentMap 
-      ? this.currentMap.set(this.backendService.currentMap!) 
+    this.backendService.currentMap() !== undefined
+      ? this.currentMap.set(this.backendService.currentMap()!)
       : this.currentMap.set(new MapModel('My Map', [[]]));
   }
 }

@@ -1,14 +1,23 @@
-<div style="display: flex; align-items: center; width: 100%;">
+<div class="page"
+     (mousemove)="onMouseMove($event)">
   <app-score-circle class="left-header"></app-score-circle>
   <h1>{{title()}}</h1>
   <app-nom-map class="right-header"></app-nom-map>
 
   <app-undo-redo class="footer-right"></app-undo-redo>
-</div>
-<div class="map">
-  @for (row of map().tiles; track $index; let i = $index) {
-    @for (tile of row; track $index; let j = $index) {
-      <app-tile-component [tile]="tile"></app-tile-component>
-    }
+  <app-tile-menu class="left-footer"></app-tile-menu>
+  @if (animal() !== undefined) {
+    <img
+      #cursorImg
+      src="{{animal()?.src}}"
+      class="cursor-image"
+      alt="Selected Animal"/>
   }
+  <div class="map">
+    @for (row of map().tiles; track $index; let y = $index) {
+      @for (tile of row; track $index; let x = $index) {
+        <app-tile-component (click)="changeTile(x,y)" [tile]="tile"></app-tile-component>
+      }
+    }
+  </div>
 </div>

@@ -1,4 +1,4 @@
-import {inject, Injectable} from '@angular/core';
+import {inject, Injectable, signal, WritableSignal} from '@angular/core';
 import { MapModel } from '../models/map-model';
 import {PlainTileModel, TileModel, TreeTileModel, WaterTileModel} from '../models/tile-model';
 import {HttpClient} from '@angular/common/http';
@@ -66,14 +66,14 @@ export interface Tile {
 })
 export class BackendService {
   private maps: MapDTO[] = [];
-  public currentMap: MapModel | null = null;
+  public currentMap: WritableSignal<MapModel | undefined> = signal(undefined);
   protected readonly Math = Math;
   private mapFactory =  new MapFactory();
   private client = inject(HttpClient)
   private readonly router = inject(Router);
 
   constructor() {
-    this.currentMap = this.getRandomMap();
+    this.currentMap.set(this.getRandomMap());
   }
 
   getRandomMap(): MapModel {
@@ -105,7 +105,7 @@ export class BackendService {
   selectMap(id: number): void {
     const map = this.getMapById(id);
     map.subscribe((map: MapModel) => {
-      this.currentMap = map;
+      this.currentMap.set(map);
       this.router.navigate(['/map']);
     })
   }
@@ -115,7 +115,7 @@ export class BackendService {
     this.client.post<MapDTO>('/api/v1/maps', createMap).subscribe({
       next: (dto: MapDTO) => {
         const activeMap = this.mapFactory.createMapFromDTO(dto);
-        this.currentMap = activeMap;
+        this.currentMap.set(activeMap);
         this.router.navigate(['/map']);
       },
       error: (err) => {

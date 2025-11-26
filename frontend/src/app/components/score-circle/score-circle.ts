@@ -1,6 +1,9 @@
-import { Component } from '@angular/core';
+import { Component , OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ScoreService } from '../../service/score-service';
+import { inject } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { GameService } from '../../service/game-service';
 
 @Component({
   selector: 'app-score-circle',
@@ -9,34 +12,34 @@ import { ScoreService } from '../../service/score-service';
   templateUrl: './score-circle.html',
   styleUrl: './score-circle.css'
 })
-export class ScoreCircle {
+export class ScoreCircle implements OnInit, OnDestroy {
   score: number = 0;
-  scoreLimit: number = 30;
-  turn: number = 1;
-  scoreService: ScoreService;
-  constructor(scoreService: ScoreService) {
-    this.scoreService = scoreService;
-  }
+  scoreLimit: number = 0;
+  turn: number = 0;
+  private subscription: Subscription = new Subscription();
+  public gameService = inject(GameService);
+  public scoreService = inject(ScoreService);
 
   ngOnInit(): void {
-    const state = this.scoreService.getScore?.();
-    if (state !== undefined) {
-      this.assignFromState(state, s => {
-        this.score = s.score ?? this.score;
-        this.scoreLimit = s.scoreLimit ?? this.scoreLimit;
-        this.turn = s.turn ?? this.turn;
-      });
-    }
+    this.updateScore();
+    
+    // Suscribirse a los cambios del score
+    this.subscription = this.gameService.changedScore$.subscribe(() => {
+      setTimeout(() => this.updateScore(), 1000);
+      this.updateScore();
+    });
   }
 
-  private assignFromState(
-    value: any,
-    setter: (s: { score?: number; turn?: number; scoreLimit?: number }) => void
-  ) {
-    if (value && typeof value.subscribe === 'function') {
-      value.subscribe((v: any) => setter(v));
-    } else {
-      setter(value);
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
+  updateScore() {
+    const state = this.scoreService.getScore();
+    if (state) {
+      this.score = state.score;
+      this.turn = state.turn;
+      this.scoreLimit = state.scoreLimit;
     }
   }
 

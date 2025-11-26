@@ -3,14 +3,17 @@ import {PlainTileModel, TileModel, TreeTileModel, WaterTileModel} from '../model
 import {AnimalModel, BearModel, FishModel, FoxModel} from '../models/animal-model';
 import {BackendService} from './backend-service';
 import {MapModel} from '../models/map-model';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameService {
-  public score: number = 6;
+  public score: number = 0;
   public turn: number = 1;
-  public scoreLimit: number = 20;
+  public scoreLimit: number = 8;
+  private changedscoreSubject = new Subject<void>();
+  public changedScore$ = this.changedscoreSubject.asObservable();
 
   public playerName: string = '';
 
@@ -126,16 +129,24 @@ public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefin
         if (!(this.animalSelected()! instanceof FishModel)){
           this.backendService.currentMap().tiles[y][x] = this.animalSelected()!.clone();
           //remplacer par la gestion du score
-          console.log("Points gagnés : ", this.backendService.currentMap().tiles.flat().reduce((acc, tile) => acc + tile.points, 0) + this.animalSelected()!.basePoints);
+          const scoreDelta = this.backendService.currentMap().tiles.flat().reduce((acc, tile) => acc + tile.points, 0) + this.animalSelected()!.basePoints;
+          this.score += scoreDelta;
+          console.log("Points gagnés : ", scoreDelta);
+          this.nextTurn();
           this.minusAnimal();
+          this.changedscoreSubject.next();
         }
         break;
       case tile instanceof WaterTileModel :
         if (this.animalSelected()! instanceof FishModel) {
           this.backendService.currentMap().tiles[y][x] = this.animalSelected()!.clone();
           //remplacer par la gestion du score
-          console.log("Points gagnés : ", this.backendService.currentMap().tiles.flat().reduce((acc, tile) => acc + tile.points, 0) + this.animalSelected()!.basePoints);
+          const scoreDelta = this.backendService.currentMap().tiles.flat().reduce((acc, tile) => acc + tile.points, 0) + this.animalSelected()!.basePoints;
+          this.score += scoreDelta;
+          this.nextTurn();
+          console.log("Points gagnés : ", scoreDelta);
           this.minusAnimal();
+          this.changedscoreSubject.next();
         }
         break;
     }
@@ -151,11 +162,18 @@ public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefin
       this.availableAnimals().get(this.animalSelected()!.getSrc())! - 1);
   }
 
-  nextTurn(scoreDelta: number = 0): void {
+  nextTurn(): void {
     if (this.isGameOver) return;
-    this.score += scoreDelta;
+    if (this.score >= this.scoreLimit) {
     this.turn += 1;
+     let limScoreTemp = 0;
+    for (let i = 1; i < this.turn + 1; i++) {
+      limScoreTemp += i * 8;
+    }
+    this.scoreLimit = limScoreTemp;
     this.futureStates = []; // clear redo history when making a new move
+    }
+    return;
   }
 
   endGame(): void {

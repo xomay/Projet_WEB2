@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
+import { inject } from '@angular/core';
 import { GameService } from './game-service';
+import { Subscription } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -8,11 +10,15 @@ export class ScoreService {
   score: number = 0;
   turn: number = 0;
   scoreLimit: number = 10;
-  private gameService: GameService;
+  public gameService = inject(GameService);
+  private subscription: Subscription;
 
-  constructor(gameService: GameService) {
-    this.gameService = gameService;
+  constructor() {
     this.updateScore();
+    this.subscription = this.gameService.changedScore$.subscribe(() => {
+      console.log('¡ServicioB: El puntaje cambió!');
+      this.updateScore();
+    });
   }
 
   getScore() {
@@ -23,14 +29,9 @@ export class ScoreService {
     this.score = scoreDelta + this.gameService.score;
     this.turn = this.gameService.turn;
     this.scoreLimit = this.gameService.scoreLimit;
+  }
 
-    /* const state = this.gameService.getState();
-    if (state !== undefined) {
-      this.score = state.score + scoreDelta;
-      this.turn = state.turn + 1;
-      this.scoreLimit = state.scoreLimit;
-    } else {
-      console.warn('GameService.getState() not found, cannot update score.');
-    } */
+  hello(){
+    console.log("Hello from ScoreService" + this.subscription);
   }
 }

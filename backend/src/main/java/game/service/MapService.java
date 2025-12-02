@@ -29,7 +29,7 @@ public class MapService {
         }
     }
 
-    public Map addMap(MapDTO map) {
+    public Map addMapDTO(MapDTO map) {
         Map newMap = new Map();
         newMap.setName(map.name());
         newMap.setTiles(map.tiles());

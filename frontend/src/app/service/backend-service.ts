@@ -78,9 +78,9 @@ export class BackendService {
 
   getRandomMap(): MapModel {
     var list = []
-    for (var i = 0; i<10; i++){
+    for (var i = 0; i<8; i++){
       var sublist = []
-      for (var j = 0; j<10; j++){
+      for (var j = 0; j<8; j++){
         const randomNum = Math.floor(Math.random() * 5);
         if (randomNum == 0 ) sublist.push(new WaterTileModel(j,i));
         else if (randomNum == 1 ) sublist.push(new TreeTileModel(j,i));

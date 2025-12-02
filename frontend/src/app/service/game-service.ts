@@ -163,16 +163,19 @@ public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefin
   nextTurn(): void {
     if (this.isGameOver) return;
     if (this.score >= this.scoreLimit) {
-    this.turn += 1;
-     let limScoreTemp = 0;
-    for (let i = 1; i < this.turn + 1; i++) {
-      limScoreTemp += i * 8;
-    }
-    this.scoreLimit = limScoreTemp;
-    this.changedscoreSubject.next();
-    this.futureStates = []; // clear redo history when making a new move
-    console.log("Tour suivant : ", this.turn, "Score limite : ", this.scoreLimit);
-    this.nextTurn();
+      this.availableAnimals().forEach((value, key, map) => {
+        map.set(key, value + 1);
+      });
+      this.turn += 1;
+      let limScoreTemp = 0;
+      for (let i = 1; i < this.turn + 1; i++) {
+        limScoreTemp += i * 8;
+      }
+      this.scoreLimit = limScoreTemp;
+      this.changedscoreSubject.next();
+      this.futureStates = []; // clear redo history when making a new move
+      console.log("Tour suivant : ", this.turn, "Score limite : ", this.scoreLimit);
+      this.nextTurn();
     }
     return;
   }

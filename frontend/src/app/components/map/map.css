@@ -1,6 +1,6 @@
 div {
   --size-cell: 58px;
-  --nb-cell: 10;
+  --nb-cell: 8;
   --z-rotate: 45deg;
   --x-rotate: 60deg;
 }

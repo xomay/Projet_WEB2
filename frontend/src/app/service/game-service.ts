@@ -134,7 +134,6 @@ public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefin
           console.log("Points gagnés : ", scoreDelta);
           this.nextTurn();
           this.minusAnimal();
-          this.changedscoreSubject.next();
         }
         break;
       case tile instanceof WaterTileModel :
@@ -146,7 +145,6 @@ public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefin
           this.nextTurn();
           console.log("Points gagnés : ", scoreDelta);
           this.minusAnimal();
-          this.changedscoreSubject.next();
         }
         break;
     }
@@ -171,7 +169,10 @@ public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefin
       limScoreTemp += i * 8;
     }
     this.scoreLimit = limScoreTemp;
+    this.changedscoreSubject.next();
     this.futureStates = []; // clear redo history when making a new move
+    console.log("Tour suivant : ", this.turn, "Score limite : ", this.scoreLimit);
+    this.nextTurn();
     }
     return;
   }

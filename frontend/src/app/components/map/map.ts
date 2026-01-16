@@ -6,6 +6,7 @@ import {BackendService} from '../../service/backend-service';
 import {TileMenu} from '../tile-menu/tile-menu';
 import {GameService} from '../../service/game-service';
 import { UndoRedo } from '../undo-redo/undo-redo';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-map',
@@ -21,6 +22,7 @@ export class Map {
   protected readonly title = signal('Web2 frontend');
   private backendService = inject(BackendService);
   private gameService = inject(GameService);
+  private router = inject(Router);
 
   public get currentMap() {
     return this.backendService.currentMap();
@@ -28,6 +30,22 @@ export class Map {
 
   public get animal() {
     return this.gameService.animalSelected();
+  }
+
+  public get status() {
+    return this.gameService.isGameOver();
+  }
+
+  public get mapName() {
+    return this.backendService.currentMap().name;
+  }
+
+  public get playerName() {
+    return this.gameService.playerName;
+  }
+
+  public get finalScore() {
+    return this.gameService.finalScore;
   }
 
   onMouseMove(event: MouseEvent) {
@@ -49,5 +67,9 @@ export class Map {
 
   changeTile(x: number, y: number): void {
     this.gameService.placeAnimal(x, y);
+  }
+
+  returnToMenu(): void {
+    this.router.navigate(['/menu']);
   }
 }

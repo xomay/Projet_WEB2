@@ -1,4 +1,4 @@
-import {inject, Injectable, signal, WritableSignal} from '@angular/core';
+import {computed, effect, inject, Injectable, Signal, signal, WritableSignal} from '@angular/core';
 import {PlainTileModel, TileModel, TreeTileModel, WaterTileModel} from '../models/tile-model';
 import {AnimalModel, BearModel, FishModel, FoxModel} from '../models/animal-model';
 import {BackendService} from './backend-service';
@@ -9,7 +9,7 @@ import { Subject } from 'rxjs';
   providedIn: 'root'
 })
 export class GameService {
-  public score: number = 0;
+  public score = signal(0);
   public turn: number = 1;
   public scoreLimit: number = 8;
   private changedscoreSubject = new Subject<void>();
@@ -17,19 +17,55 @@ export class GameService {
 
   public playerName: string = '';
 
-public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefined);
+  public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefined);
   public availableAnimals: WritableSignal<Map<string, number>> = signal(new Map<string, number>([
     ['bear', 1],
     ['fish', 0],
     ['fox', 0]
   ]));
+  private tilesLeft: Signal<number> = computed(() => {
+    const map = this.backendService.currentMap();
+    let count = 0;
+    map.tiles.forEach(row => {
+      row.forEach(tile => {
+        if (tile instanceof PlainTileModel || tile instanceof TreeTileModel || tile instanceof WaterTileModel) {
+          count += 1;
+        }
+      });
+    });
+    return count;
+  });
 
   private backendService = inject(BackendService);
 
   private pastStates: { score: number; turn: number }[] = [];
   private futureStates: { score: number; turn: number }[] = [];
-  isGameOver: boolean = false;
+  isGameOver: WritableSignal<boolean> = signal(false);
   finalScore: number | null = null;
+
+  constructor() {
+    // Effect to look for the end of the game when no available animals are left
+    effect(() => {
+      if (!this.isGameOver() && this.score() > 0) {
+        let count = 0;
+        this.availableAnimals().forEach((element) => {
+          count += element;
+        })
+        if (count === 0) {
+          this.endGame();
+          console.log("Game Over! Final Score: ", this.finalScore);
+        }
+      }
+    });
+
+    // Effect to end game if no more tiles are available for placement
+    effect(() => {
+      if (!this.isGameOver() && this.tilesLeft() === 0) {
+        this.endGame();
+        console.log("Game Over! Final Score: ", this.finalScore);
+      }
+    });
+  }
 
   setAnimalSelected(animal: AnimalModel): void {
     if (this.availableAnimals().get(animal.getSrc()) === undefined) return;
@@ -130,7 +166,7 @@ public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefin
           this.backendService.currentMap().tiles[y][x] = this.animalSelected()!.clone();
           //remplacer par la gestion du score
           const scoreDelta = this.backendService.currentMap().tiles.flat().reduce((acc, tile) => acc + tile.points, 0) + this.animalSelected()!.basePoints;
-          this.score += scoreDelta;
+          this.score.set(this.score() + scoreDelta);
           console.log("Points gagnés : ", scoreDelta);
           this.nextTurn();
           this.minusAnimal();
@@ -141,7 +177,7 @@ public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefin
           this.backendService.currentMap().tiles[y][x] = this.animalSelected()!.clone();
           //remplacer par la gestion du score
           const scoreDelta = this.backendService.currentMap().tiles.flat().reduce((acc, tile) => acc + tile.points, 0) + this.animalSelected()!.basePoints;
-          this.score += scoreDelta;
+          this.score.set(this.score() + scoreDelta);
           this.nextTurn();
           console.log("Points gagnés : ", scoreDelta);
           this.minusAnimal();
@@ -161,8 +197,8 @@ public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefin
   }
 
   nextTurn(): void {
-    if (this.isGameOver) return;
-    if (this.score >= this.scoreLimit) {
+    if (this.isGameOver()) return;
+    if (this.score() >= this.scoreLimit) {
       this.availableAnimals().forEach((value, key, map) => {
         map.set(key, value + 1);
       });
@@ -172,28 +208,28 @@ public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefin
         limScoreTemp += i * 8;
       }
       this.scoreLimit = limScoreTemp;
-      this.changedscoreSubject.next();
       this.futureStates = []; // clear redo history when making a new move
       console.log("Tour suivant : ", this.turn, "Score limite : ", this.scoreLimit);
       this.nextTurn();
     }
+    this.changedscoreSubject.next();
     return;
   }
 
   endGame(): void {
-    if (this.isGameOver) return;
-    this.isGameOver = true;
-    this.finalScore = this.score;
+    if (this.isGameOver()) return;
+    this.isGameOver.set(true);
+    this.finalScore = this.score();
     // optionally keep final state in history
   }
 
   undo(): boolean {
     if (this.pastStates.length === 0) return false;
     const previous = this.pastStates.pop()!;
-    this.futureStates.push({ score: this.score, turn: this.turn });
-    this.score = previous.score;
+    this.futureStates.push({ score: this.score(), turn: this.turn });
+    this.score.set(previous.score);
     this.turn = previous.turn;
-    this.isGameOver = false;
+    this.isGameOver.set(false);
     this.finalScore = null;
     return true;
   }
@@ -201,8 +237,8 @@ public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefin
   redo(): boolean {
     if (this.futureStates.length === 0) return false;
     const next = this.futureStates.pop()!;
-    this.pastStates.push({ score: this.score, turn: this.turn });
-    this.score = next.score;
+    this.pastStates.push({ score: this.score(), turn: this.turn });
+    this.score.set(next.score);
     this.turn = next.turn;
     return true;
   }

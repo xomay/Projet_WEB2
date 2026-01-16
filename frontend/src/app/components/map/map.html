@@ -20,4 +20,12 @@
       }
     }
   </div>
+
+  @if (status){
+    <div class="end-game-overlay">
+      <p>Fin de la partie sur : {{ mapName }}</p>
+      <p>Score final de {{ playerName }} : {{ finalScore }} points</p>
+      <button (click)="returnToMenu()">Retour au menu</button>
+    </div>
+  }
 </div>

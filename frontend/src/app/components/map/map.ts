@@ -1,53 +1,131 @@
-import {Component, ElementRef, inject, signal, ViewChild} from '@angular/core';
+import { Component, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import { InteractoModule } from 'interacto-angular';
+import { PartialPointOrTouchTypedBinder, UndoableCommand } from 'interacto';
+
 import { TileComponent } from '../tile-component/tile-component';
-import {NomMap} from '../nom-map/nom-map';
-import {ScoreCircle} from '../score-circle/score-circle';
-import {BackendService} from '../../service/backend-service';
-import {TileMenu} from '../tile-menu/tile-menu';
-import {GameService} from '../../service/game-service';
+import { NomMap } from '../nom-map/nom-map';
+import { ScoreCircle } from '../score-circle/score-circle';
+import { TileMenu } from '../tile-menu/tile-menu';
 import { UndoRedo } from '../undo-redo/undo-redo';
+
+import { BackendService } from '../../service/backend-service';
+import { GameService } from '../../service/game-service';
+// import { Subscription } from 'rxjs';
+import { MapModel } from '../../models/map-model';
+import { TileModel } from '../../models/tile-model';
+import { AnimalModel } from '../../models/animal-model';
 
 @Component({
   selector: 'app-map',
-  imports: [TileComponent, NomMap, ScoreCircle, TileMenu, UndoRedo],
+  standalone: true,
+  imports: [
+    TileComponent,
+    NomMap,
+    ScoreCircle,
+    TileMenu,
+    UndoRedo,
+    InteractoModule
+  ],
   templateUrl: './map.html',
   styleUrl: './map.css'
 })
 export class Map {
 
-  //private tiles = [{ src: '/water.svg' }, { src: '/tree.svg' }, { src: '/plain.svg' }];
-  //map = input<MapModel>(new MapModel('My Map'));
-  @ViewChild('cursorImg', {static: false}) cursorImg!: ElementRef<HTMLImageElement>;
-  protected readonly title = signal('Web2 frontend');
   private backendService = inject(BackendService);
   private gameService = inject(GameService);
 
-  public get currentMap() {
+  protected readonly title = signal('Web2 frontend');
+
+  @ViewChild('cursorImg', { static: false })
+  cursorImg!: ElementRef<HTMLImageElement>;
+
+  protected clickChange(
+    binder: PartialPointOrTouchTypedBinder,
+    x: number,
+    y: number
+  ): void {
+    binder
+      .toProduce(() => new Change(x, y, this.gameService, this.backendService))
+      .bind();
+  }
+
+  get currentMap() {
     return this.backendService.currentMap();
   }
 
-  public get animal() {
+  get animal() {
     return this.gameService.animalSelected();
   }
 
-  onMouseMove(event: MouseEvent) {
-    if (!this.cursorImg) return;
-    if (this.gameService.animalSelected() === undefined) return;
+  onMouseMove(event: MouseEvent): void {
+    if (!this.cursorImg || !this.animal) return;
     const img = this.cursorImg.nativeElement;
-    if (!img) return;
     img.style.left = event.clientX + 'px';
     img.style.top = event.clientY + 'px';
   }
+}
 
-  protected readonly Math = Math;
-  getTile(): string {
-    const randomNum = Math.floor(Math.random() * 5);
-    if (randomNum == 0 ) return '/water.svg';
-    if (randomNum == 1 ) return '/tree.svg';
-    return '/plain.svg';
+/* =========================================================
+   SNAPSHOT INTERFACE
+   ========================================================= */
+
+interface GameSnapshot {
+  tile: TileModel;
+  score: number;
+  turn: number;
+  scoreLimit: number;
+  //availableAnimals: Record<string, number>;
+  selectedAnimal: AnimalModel | undefined;
+}
+
+export class Change extends UndoableCommand {
+
+  private snapshot!: GameSnapshot;
+
+  constructor(
+    private readonly x: number,
+    private readonly y: number,
+    private readonly gameService: GameService,
+    private readonly backendService: BackendService
+  ) {
+    super();
   }
 
-  changeTile(x: number, y: number): void {
-    this.gameService.placeAnimal(x, y);
+  execution(): void {
+    const map = this.backendService.currentMap();
+
+    this.snapshot = {
+      tile: map.tiles[this.y][this.x],
+      score: this.gameService.score,
+      scoreLimit: this.gameService.scoreLimit,
+      turn: this.gameService.turn,
+      //availableAnimals: this.gameService.availableAnimals(),
+      selectedAnimal: this.gameService.animalSelected()
+    };
+
+    this.gameService.placeAnimal(this.x, this.y);
+    console.log("Placed animal at:", this.x, this.y);
+
+  }
+
+  undo(): void {
+    const map = this.backendService.currentMap();
+
+    map.tiles[this.y][this.x] = this.snapshot.tile;
+
+    this.gameService.score = this.snapshot.score;
+    this.gameService.turn = this.snapshot.turn;
+    //this.gameService.availableAnimals.set(this.snapshot.availableAnimals);
+    this.gameService.scoreLimit = this.snapshot.scoreLimit;
+    this.gameService.animalSelected.set(this.snapshot.selectedAnimal);
+
+    this.backendService.currentMap.set(
+      new MapModel(map.name, map.tiles)
+    );
+  }
+
+  redo(): void {
+    this.gameService.placeAnimal(this.x, this.y);
+    this.gameService.nextTurn();
   }
 }

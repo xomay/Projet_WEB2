@@ -25,9 +25,6 @@ public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefin
   ]));
 
   private backendService = inject(BackendService);
-
-  private pastStates: { score: number; turn: number }[] = [];
-  private futureStates: { score: number; turn: number }[] = [];
   isGameOver: boolean = false;
   finalScore: number | null = null;
 
@@ -173,10 +170,10 @@ public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefin
       }
       this.scoreLimit = limScoreTemp;
       this.changedscoreSubject.next();
-      this.futureStates = []; // clear redo history when making a new move
       console.log("Tour suivant : ", this.turn, "Score limite : ", this.scoreLimit);
       this.nextTurn();
     }
+    this.changedscoreSubject.next();
     return;
   }
 
@@ -184,26 +181,6 @@ public animalSelected : WritableSignal<AnimalModel | undefined> = signal(undefin
     if (this.isGameOver) return;
     this.isGameOver = true;
     this.finalScore = this.score;
-    // optionally keep final state in history
   }
 
-  undo(): boolean {
-    if (this.pastStates.length === 0) return false;
-    const previous = this.pastStates.pop()!;
-    this.futureStates.push({ score: this.score, turn: this.turn });
-    this.score = previous.score;
-    this.turn = previous.turn;
-    this.isGameOver = false;
-    this.finalScore = null;
-    return true;
-  }
-
-  redo(): boolean {
-    if (this.futureStates.length === 0) return false;
-    const next = this.futureStates.pop()!;
-    this.pastStates.push({ score: this.score, turn: this.turn });
-    this.score = next.score;
-    this.turn = next.turn;
-    return true;
-  }
 }

@@ -16,7 +16,7 @@ export class ScoreService {
   constructor() {
     this.updateScore();
     this.subscription = this.gameService.changedScore$.subscribe(() => {
-      console.log('¡ServicioB: El puntaje cambió!');
+      console.log('The score has changed in ScoreService.');
       this.updateScore();
     });
   }

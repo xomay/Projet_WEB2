@@ -7,6 +7,7 @@ import { NomMap } from '../nom-map/nom-map';
 import { ScoreCircle } from '../score-circle/score-circle';
 import { TileMenu } from '../tile-menu/tile-menu';
 import { UndoRedo } from '../undo-redo/undo-redo';
+import {Router} from '@angular/router';
 
 import { BackendService } from '../../service/backend-service';
 import { GameService } from '../../service/game-service';
@@ -33,6 +34,8 @@ export class Map {
 
   private backendService = inject(BackendService);
   private gameService = inject(GameService);
+  private router = inject(Router);
+
 
   protected readonly title = signal('Web2 frontend');
 
@@ -49,13 +52,31 @@ export class Map {
       .bind();
   }
 
-  get currentMap() {
+  public get currentMap() {
     return this.backendService.currentMap();
   }
 
   get animal() {
     return this.gameService.animalSelected();
   }
+
+  public get status() {
+    return this.gameService.isGameOver();
+  }
+
+  public get mapName() {
+    return this.backendService.currentMap().name;
+  }
+
+  public get playerName() {
+    return this.gameService.playerName;
+  }
+
+  public get finalScore() {
+    return this.gameService.finalScore;
+  }
+
+
 
   onMouseMove(event: MouseEvent): void {
     if (!this.cursorImg || !this.animal) return;
@@ -64,6 +85,7 @@ export class Map {
     img.style.top = event.clientY + 'px';
   }
 }
+
 
 /* =========================================================
    SNAPSHOT INTERFACE
@@ -127,5 +149,13 @@ export class Change extends UndoableCommand {
   redo(): void {
     this.gameService.placeAnimal(this.x, this.y);
     this.gameService.nextTurn();
+  }
+
+  returnToMenu(): void {
+    this.router.navigate(['/menu']);
+  }
+
+  returnToMenu(): void {
+    this.router.navigate(['/menu']);
   }
 }

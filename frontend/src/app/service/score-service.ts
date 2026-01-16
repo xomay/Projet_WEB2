@@ -26,7 +26,7 @@ export class ScoreService {
   }
 
   updateScore(scoreDelta: number = 0): void {
-    this.score = scoreDelta + this.gameService.score;
+    this.score = scoreDelta + this.gameService.score();
     this.turn = this.gameService.turn;
     this.scoreLimit = this.gameService.scoreLimit;
   }

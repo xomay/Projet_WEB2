@@ -51,7 +51,7 @@ public class MapController {
 
     @PostMapping(path = "maps", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map> post(@RequestBody MapDTO map) {
-        Map res = mapService.addMap(map);
+        Map res = mapService.addMapDTO(map);
         return ResponseEntity.ok(res);
     }
 }

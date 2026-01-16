@@ -15,9 +15,6 @@ export class TileMenu {
   public fox = new FoxModel(0,0);
 
   setActiveAnimal(animal: AnimalModel): void {
-    console.log(`Selected animal set to: ${animal.getSrc()}`);
     this.gameService.setAnimalSelected(animal);
-    // Here you would typically notify other parts of your application
-    // about the selected tile type, e.g., via a service or state management.
   }
 }

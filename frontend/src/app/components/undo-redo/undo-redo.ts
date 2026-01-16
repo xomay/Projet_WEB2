@@ -1,31 +1,19 @@
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
+import {RedoBinderDirective, UndoBinderDirective} from "interacto-angular";
+import {GameService} from '../../service/game-service';
 
 @Component({
   selector: 'app-undo-redo',
-  imports: [],
+    imports: [
+        RedoBinderDirective,
+        UndoBinderDirective
+    ],
   templateUrl: './undo-redo.html',
   styleUrl: './undo-redo.css'
 })
 export class UndoRedo {
-  undo() {
-    console.log('Undo action triggered');
-  }
-
-  redo() {
-    console.log('Redo action triggered');
-  }
-
-  canUndo(): boolean {
-    // Placeholder logic for enabling/disabling undo button
-    return true;
-  }
-
-  canRedo(): boolean {
-    // Placeholder logic for enabling/disabling redo button
-    return true;
-  }
-
+  private GameService = inject(GameService)
   endGame() {
-    console.log('End game action triggered');
+    this.GameService.endGame();
   }
 }

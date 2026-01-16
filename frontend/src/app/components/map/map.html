@@ -6,13 +6,11 @@
 
   <app-undo-redo class="footer-right"></app-undo-redo>
   <app-tile-menu class="left-footer"></app-tile-menu>
-  <button ioUndo>Undo</button>
-  <button ioRedo>Redo</button>
 
   @if (animal !== undefined) {
     <img
       #cursorImg
-      src="{{animal?.src}}"
+      src="{{animal.src}}"
       class="cursor-image"
       alt="Selected Animal"/>
   }

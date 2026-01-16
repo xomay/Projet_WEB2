@@ -2,10 +2,10 @@
     <link rel="stylesheet" href="./undo-redo.css">
 </head>
 <div class="button-box">
-    <button class="arrow-btn" (click)="undo()" [disabled]="!canUndo()">
+    <button class="arrow-btn" ioUndo>
         <img class="icon-btn" src="undo.png" alt="Undo">
     </button>
-    <button class="arrow-btn" (click)="redo()" [disabled]="!canRedo()">
+    <button class="arrow-btn" ioRedo>
         <img class="icon-btn" src="redo.png" alt="Redo">
     </button>
     <button class="end-btn" (click)="endGame()">End game</button>

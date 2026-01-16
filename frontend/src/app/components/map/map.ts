@@ -11,10 +11,10 @@ import {Router} from '@angular/router';
 
 import { BackendService } from '../../service/backend-service';
 import { GameService } from '../../service/game-service';
-// import { Subscription } from 'rxjs';
 import { MapModel } from '../../models/map-model';
 import { TileModel } from '../../models/tile-model';
 import { AnimalModel } from '../../models/animal-model';
+import {ScoreService} from '../../service/score-service';
 
 @Component({
   selector: 'app-map',
@@ -34,6 +34,7 @@ export class Map {
 
   private backendService = inject(BackendService);
   private gameService = inject(GameService);
+  private scoreService = inject(ScoreService);
   private router = inject(Router);
 
 
@@ -48,7 +49,7 @@ export class Map {
     y: number
   ): void {
     binder
-      .toProduce(() => new Change(x, y, this.gameService, this.backendService))
+      .toProduce(() => new Change(x, y, this.gameService, this.backendService, this.scoreService))
       .bind();
   }
 
@@ -76,7 +77,9 @@ export class Map {
     return this.gameService.finalScore;
   }
 
-
+  returnToMenu(): void {
+    this.router.navigate(['/menu']);
+  }
 
   onMouseMove(event: MouseEvent): void {
     if (!this.cursorImg || !this.animal) return;
@@ -108,7 +111,8 @@ export class Change extends UndoableCommand {
     private readonly x: number,
     private readonly y: number,
     private readonly gameService: GameService,
-    private readonly backendService: BackendService
+    private readonly backendService: BackendService,
+    private readonly scoreService: ScoreService
   ) {
     super();
   }
@@ -118,16 +122,14 @@ export class Change extends UndoableCommand {
 
     this.snapshot = {
       tile: map.tiles[this.y][this.x],
-      score: this.gameService.score,
-      scoreLimit: this.gameService.scoreLimit,
-      turn: this.gameService.turn,
+      score: this.scoreService.score(),
+      scoreLimit: this.scoreService.scoreLimit(),
+      turn: this.scoreService.turn(),
       //availableAnimals: this.gameService.availableAnimals(),
       selectedAnimal: this.gameService.animalSelected()
     };
 
     this.gameService.placeAnimal(this.x, this.y);
-    console.log("Placed animal at:", this.x, this.y);
-
   }
 
   undo(): void {
@@ -135,10 +137,9 @@ export class Change extends UndoableCommand {
 
     map.tiles[this.y][this.x] = this.snapshot.tile;
 
-    this.gameService.score = this.snapshot.score;
-    this.gameService.turn = this.snapshot.turn;
-    //this.gameService.availableAnimals.set(this.snapshot.availableAnimals);
-    this.gameService.scoreLimit = this.snapshot.scoreLimit;
+    this.scoreService.score.set(this.snapshot.score);
+    this.scoreService.turn.set(this.snapshot.turn);
+    this.scoreService.scoreLimit.set(this.snapshot.scoreLimit);
     this.gameService.animalSelected.set(this.snapshot.selectedAnimal);
 
     this.backendService.currentMap.set(
@@ -149,13 +150,5 @@ export class Change extends UndoableCommand {
   redo(): void {
     this.gameService.placeAnimal(this.x, this.y);
     this.gameService.nextTurn();
-  }
-
-  returnToMenu(): void {
-    this.router.navigate(['/menu']);
-  }
-
-  returnToMenu(): void {
-    this.router.navigate(['/menu']);
   }
 }

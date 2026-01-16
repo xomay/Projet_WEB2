@@ -9,7 +9,6 @@
   gap: 1rem;
   border-radius: 25px;
   padding: 10px;
-  //box-shadow: 5px 5px 5px 20px lightgrey;
 }
 
 .tile-button {
@@ -20,7 +19,6 @@
   border-radius: 15px;
   padding: 10px;
   position: relative;
-  //box-shadow: 5px 5px 5px 12px lightgrey;
 }
 
 .tile-button:hover {
